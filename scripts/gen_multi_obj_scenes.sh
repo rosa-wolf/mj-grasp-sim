@@ -8,7 +8,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TRAIN_OBJ_FILE="$PROJECT_ROOT/asset/mj-objects/obj_unsymmetric_train.txt"
-NUM_CPUS="${1:-50}"
+NUM_CPUS="${1:-80}"
 TARGET_SCENES=5000
 
 # Check if object file exists

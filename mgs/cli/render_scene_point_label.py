@@ -13,7 +13,7 @@ from mgs.gripper.selector import get_gripper
 from mgs.sampler.helper import farthest_point_sampling
 from mgs.util.img_proc import detect_outlier, rgbd_to_pcd, voxel_downsample_pcd
 import mujoco
-import open3d as o3d
+#import open3d as o3d
 
 def visualize_pointcloud_and_wait(points: np.ndarray, colors: np.ndarray):
     """Show a point cloud in Open3D and block until the user presses Space/Enter/Q."""
@@ -71,16 +71,20 @@ def main(cfg: DictConfig):
     #os.environ.setdefault("MGS_INPUT_DIR", input_dir)
     # set base output dir (before adding gripper/hash suffix)
     #os.environ.setdefault("MGS_OUTPUT_DIR", output_dir)
-
-    input_dir_all = os.path.join(input_dir_all, cfg.gripper.name)
-     
-    scene_dir_list = [
-        d for d in os.listdir(input_dir_all) if os.path.isdir(os.path.join(input_dir_all, d))
-    ]
     
-    # filter all scene where file name is starting with cfg.input_id
-    print(cfg.input_id)
-    scene_dir_list = [d for d in scene_dir_list if d.startswith(str(cfg.input_id))]
+    # Accept scene_dirs as a comma-separated list from the command line (via Hydra overrides)
+    input_dir_all = os.path.join(input_dir_all, cfg.gripper.name)
+
+    if cfg.scene_dirs is not None:
+        # Accept both comma-separated and Python list string
+        scene_dir_list = cfg.scene_dirs
+    else:
+        scene_dir_list = [
+            d for d in os.listdir(input_dir_all) if os.path.isdir(os.path.join(input_dir_all, d))
+        ]
+        # filter all scene where file name is starting with cfg.input_id
+        print(cfg.input_id)
+        scene_dir_list = [d for d in scene_dir_list if d.startswith(str(cfg.input_id))]
     
     
     # filter all scene dirs where file scene_pcd.npz already exists
@@ -88,7 +92,6 @@ def main(cfg: DictConfig):
         d for d in scene_dir_list if not os.path.exists(os.path.join(input_dir_all, d, "scene_pcd.npz"))
     ]
     
-
     num  = len(scene_dir_list)
     count = 1
     for scene_dir in scene_dir_list:
