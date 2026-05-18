@@ -213,12 +213,12 @@ class ClutterTableEnv(MjScanEnv, Loadable):
         def random_pose():
             scipy_random_quat = Rotation.random().as_quat()  # type: ignore
             mujoco_random_quat = quat_xyzw_to_wxyz(scipy_random_quat)
-            if np.random.rand() < 0.1:
+            if np.random.rand() < 0.05:
                 # sample rotation angle around z-axis
                 scipy_random_quat = Rotation.from_euler("z", np.random.uniform(0, 2 * np.pi)).as_quat() 
                 mujoco_random_quat = quat_xyzw_to_wxyz(scipy_random_quat)
             return SE3Pose(
-                pos=np.array([np.random.uniform(-0.1, 0.1), np.random.uniform(-0.1, 0.1), 0.4]), quat=mujoco_random_quat, type="wxyz"
+                pos=np.array([np.random.uniform(-0.08, 0.08), np.random.uniform(-0.08, 0.08), 0.4]), quat=mujoco_random_quat, type="wxyz"
                 #pos=np.array(0.4, np.random.uniform(0., 0.4), 0.4]), quat=mujoco_random_quat, type="wxyz"
             )
 

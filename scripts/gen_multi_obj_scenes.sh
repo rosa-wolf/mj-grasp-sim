@@ -8,8 +8,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TRAIN_OBJ_FILE="$PROJECT_ROOT/asset/mj-objects/obj_unsymmetric_train.txt"
-NUM_CPUS="${1:-90}"
-TARGET_SCENES=25000
+NUM_CPUS="${1:-50}"
+TARGET_SCENES=5000
 
 # Check if object file exists
 if [[ ! -f "$TRAIN_OBJ_FILE" ]]; then
@@ -101,7 +101,7 @@ worker_process() {
         # ------------------------------------------------------------------ #
         i=1
         retries=0
-        while [[ $i -le 15 ]]; do
+        while [[ $i -le 10 ]]; do
             # Check global target before each scene
             exec 200>"$LOCK_FILE"
             flock 200
@@ -113,7 +113,7 @@ worker_process() {
             flock -u 200
             exec 200>&-
 
-            echo "[Worker $worker_id] Scene $i/15 for $hydra_ids (total: $current_count/$TARGET_SCENES)"
+            echo "[Worker $worker_id] Scene $i/10 for $hydra_ids (total: $current_count/$TARGET_SCENES)"
             set +e
             output=$(cd "$PROJECT_ROOT" && python -m mgs.cli.gen_scene "object.ids=$hydra_ids" 2>&1)
             exit_code=$?
@@ -124,7 +124,7 @@ worker_process() {
 
             if [[ $exit_code -ne 0 ]] || echo "$output" | grep -qiE "(exception|error|Not enough collision free grasps)"; then
                 retries=$((retries + 1))
-                echo "[Worker $worker_id] Failed, retrying scene $i/15 for $hydra_ids (retry $retries/10)"
+                echo "[Worker $worker_id] Failed, retrying scene $i/10 for $hydra_ids (retry $retries/10)"
                 if [[ $retries -ge 10 ]]; then
                     echo "[Worker $worker_id] Too many retries for $hydra_ids, skipping group"
                     break

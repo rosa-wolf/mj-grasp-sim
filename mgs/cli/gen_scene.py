@@ -217,8 +217,7 @@ def gen_stable_scene(cfg: DictConfig, max_attempts: int = 5):
             jnt_adr_start = jnt.qposadr[0].item()
             obj_position = np.copy(env.data.qpos[jnt_adr_start : jnt_adr_start + 3])
             x, y = float(obj_position[0]), float(obj_position[1])
-            if ((0.20 < abs(x) <= 0.225) and abs(y) < 0.225) or (
-                (0.20 < abs(y) <= 0.225) and abs(x) < 0.225
+            if (0.20 < abs(x)) or (0.20 < abs(y) # too far at edge of later rendered field
             ):
                 exclude_scene = True
                 break
@@ -440,7 +439,7 @@ def filter_grasps(cfg: DictConfig, scene_def):
 def main(cfg: DictConfig):    #output_dir = os.getenv("MGS_OUTPUT_DIR")
     #input_dir = os.getenv("MGS_INPUT_DIR")
     
-    output_dir = "/home/ws/data/outputs/context_clutter" 
+    output_dir = "/home/ws/data/outputs/context_clutter_v3" 
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     input_dir = os.path.join(repo_root, "outputs_obj_grasps")
     assert output_dir is not None, "No output_dir defined!"

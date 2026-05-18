@@ -1,4 +1,5 @@
 import os
+import importlib
 from copy import deepcopy
 
 import hydra
@@ -12,6 +13,36 @@ from mgs.gripper.selector import get_gripper
 from mgs.sampler.helper import farthest_point_sampling
 from mgs.util.img_proc import detect_outlier, rgbd_to_pcd, voxel_downsample_pcd
 import mujoco
+import open3d as o3d
+
+def visualize_pointcloud_and_wait(points: np.ndarray, colors: np.ndarray):
+    """Show a point cloud in Open3D and block until the user presses Space/Enter/Q."""
+   
+
+    if points.size == 0:
+        print("Point cloud is empty. Skipping Open3D visualization.")
+        return
+
+    vis = o3d.visualization.VisualizerWithKeyCallback()
+    vis.create_window(window_name="Scene Point Cloud")
+
+    pcd_o3d = o3d.geometry.PointCloud()
+    pcd_o3d.points = o3d.utility.Vector3dVector(np.asarray(points, dtype=np.float64))
+    pcd_o3d.colors = o3d.utility.Vector3dVector(np.asarray(colors, dtype=np.float64))
+    vis.add_geometry(pcd_o3d)
+
+    def _close_callback(v):
+        v.close()
+        return False
+
+    # Continue when user presses Space, Enter, or Q.
+    vis.register_key_callback(ord(" "), _close_callback)
+    vis.register_key_callback(257, _close_callback)  # GLFW_KEY_ENTER
+    vis.register_key_callback(ord("Q"), _close_callback)
+
+    print("Open3D viewer opened. Press Space/Enter/Q (or close window) to continue...")
+    vis.run()
+    vis.destroy_window()
 
 
 def scan(cfg: DictConfig, scene_def):
@@ -30,7 +61,7 @@ def main(cfg: DictConfig):
     #assert output_dir_all is not None
     #assert input_dir_all is not None
     
-    input_dir_all = "/home/ws/data/outputs/context_clutter" 
+    input_dir_all = "/home/ws/data/outputs/context_clutter_v3" 
     output_dir_all = input_dir_all
     assert output_dir_all is not None, "No output_dir defined!"
     assert input_dir_all is not None, "No input_dir defined!"
@@ -94,6 +125,8 @@ def main(cfg: DictConfig):
         pcd = pcd[idx]
         feature = feature[idx]
         segmentation_label = segmentation_label[idx]
+
+        #visualize_pointcloud_and_wait(pcd, feature)
 
         output_dir = os.path.join(output_dir_all, cfg.gripper.name, scene_dir)
         os.makedirs(output_dir, exist_ok=True)
