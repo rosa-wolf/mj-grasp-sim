@@ -9,6 +9,7 @@ defaults:
 num_images: 200
 id: 0
 input_id: "0"
+scene_dirs: None
 
 hydra:
   job:
